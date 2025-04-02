@@ -8,31 +8,41 @@ jobs:
   validate-merge-source:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug PR Info
+        run: |
+          echo "Base branch: ${{ github.base_ref }}"
+          echo "Head branch: ${{ github.head_ref }}"
+
       - name: Check PR source branch
         run: |
-          BASE_BRANCH="${{ github.base_ref }}"  # Target branch (e.g., main)
-          HEAD_BRANCH="${{ github.head_ref }}"  # Source branch (e.g., development)
-
-          # Define allowed merge paths
+          BASE_BRANCH="${{ github.base_ref }}"  # Target branch
+          HEAD_BRANCH="${{ github.head_ref }}"  # Source branch
+          
           case "$BASE_BRANCH" in
             "main")
-              if [[ "$HEAD_BRANCH" != "development" ]]; then
+              if [[ "$HEAD_BRANCH" == "development" ]]; then
+                echo "✅ Allowed: Merging development → main"
+                exit 0
+              else
                 echo "::error::PRs to 'main' must come from 'development'!"
                 exit 1
               fi
               ;;
             "development")
-              if [[ "$HEAD_BRANCH" != "staging" ]]; then
-                echo "::error::PRs to 'development' must come from 'staging'!"
+              if [[ "$HEAD_BRANCH" == "staging" || "$HEAD_BRANCH" == "main" ]]; then
+                echo "✅ Allowed: Merging from staging/main → development"
+                exit 0
+              else
+                echo "::error::PRs to 'development' must come from 'staging' or 'main'!"
                 exit 1
               fi
               ;;
             "staging")
-              # Allow any branch → staging
+              echo "✅ Allowed: Any branch can merge into staging"
               exit 0
               ;;
             *)
-              # Not a protected branch
+              echo "✅ Allowed: No restrictions on other branches"
               exit 0
               ;;
           esac

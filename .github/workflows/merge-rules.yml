@@ -21,28 +21,22 @@ jobs:
           case "$BASE_BRANCH" in
             "main")
               if [[ "$HEAD_BRANCH" == "development" ]]; then
-                echo "✅ Allowed: Merging development → main"
                 exit 0
               else
-                echo "::error::PRs to 'main' must come from 'development'!"
                 exit 1
               fi
               ;;
             "development")
               if [[ "$HEAD_BRANCH" == "staging" || "$HEAD_BRANCH" == "main" ]]; then
-                echo "✅ Allowed: Merging from staging/main → development"
                 exit 0
               else
-                echo "::error::PRs to 'development' must come from 'staging' or 'main'!"
                 exit 1
               fi
               ;;
             "staging")
-              echo "✅ Allowed: Any branch can merge into staging"
-              exit 0
+                exit 0
               ;;
             *)
-              echo "✅ Allowed: No restrictions on other branches"
-              exit 0
+             exit 0
               ;;
           esac

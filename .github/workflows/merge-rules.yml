@@ -1,0 +1,38 @@
+name: Enforce Merge Hierarchy
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  validate-merge-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR source branch
+        run: |
+          BASE_BRANCH="${{ github.base_ref }}"  # Target branch (e.g., main)
+          HEAD_BRANCH="${{ github.head_ref }}"  # Source branch (e.g., development)
+
+          # Define allowed merge paths
+          case "$BASE_BRANCH" in
+            "main")
+              if [[ "$HEAD_BRANCH" != "development" ]]; then
+                echo "::error::PRs to 'main' must come from 'development'!"
+                exit 1
+              fi
+              ;;
+            "development")
+              if [[ "$HEAD_BRANCH" != "staging" ]]; then
+                echo "::error::PRs to 'development' must come from 'staging'!"
+                exit 1
+              fi
+              ;;
+            "staging")
+              # Allow any branch → staging
+              exit 0
+              ;;
+            *)
+              # Not a protected branch
+              exit 0
+              ;;
+          esac
